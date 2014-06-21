@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Mock FS Example</title>
+
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bower_components/codemirror/lib/codemirror.css">
+
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <script data-main="js/main" src="bower_components/requirejs/require.js"></script>
+</head>
+<body>
+<div>
+<textarea id="text-code" name="text-code">
+/* global mockfs, output */
+
+var files = {};
+
+var processDir = function (path, entry) {
+    var files = mockfs.listSync(path);
+    files.forEach(function (f) {
+        try {
+            var childPath = mockfs.join(path, f),
+                stat = mockfs.statSync(childPath);
+
+            if (stat.isDirectory()) {
+                entry[f] = {};
+                processDir(childPath, entry[f]);
+            } else if (stat.isFile()) {
+                entry[f] = "file";
+            } else {
+                entry[f] = "unknown";
+            }
+
+        } catch (e) {
+            entry[f] = "error: " + e.message;
+        }
+    });
+};
+
+processDir("/", files);
+
+output(files);
+</textarea>
+</div>
+<button id="btn-run">Run</button>
+<h1>Output</h1>
+<div id="div-output">
+</div>
+</body>
+</html>

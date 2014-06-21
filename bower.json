@@ -1,0 +1,26 @@
+{
+  "name": "mockfs",
+  "version": "0.0.1",
+  "homepage": "https://github.com/joelrbrandt/mockfs",
+  "authors": [
+    "Joel Brandt <joelrbrandt@gmail.com>"
+  ],
+  "main": "js/main.js",
+  "moduleType": [
+    "amd"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "requirejs": "~2.1.14",
+    "codemirror": "~4.2.0",
+    "bootstrap": "~3.1.1"
+  }
+}
