@@ -18,8 +18,10 @@
   "homepage": "https://github.com/joelrbrandt/mockfs",
   "devDependencies": {
     "grunt": "^0.4.5",
-    "grunt-jscs-checker": "^0.4.4",
+    "grunt-contrib-copy": "^0.5.0",
     "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-requirejs": "^0.4.4",
+    "grunt-jscs-checker": "^0.4.4",
     "jscs-trailing-whitespace-in-source": "0.0.1"
   }
 }
