@@ -66,8 +66,8 @@
             if (!e) {
                 break;
             }
-        } 
-
+        }
+        
         return e;
     };
 

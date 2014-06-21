@@ -1,0 +1,25 @@
+{
+  "name": "mockfs",
+  "version": "0.0.1",
+  "description": "",
+  "main": "Gruntfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joelrbrandt/mockfs.git"
+  },
+  "author": "Joel Brandt <joelrbrandt@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/joelrbrandt/mockfs/issues"
+  },
+  "homepage": "https://github.com/joelrbrandt/mockfs",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-jscs-checker": "^0.4.4",
+    "grunt-contrib-jshint": "^0.10.0",
+    "jscs-trailing-whitespace-in-source": "0.0.1"
+  }
+}
