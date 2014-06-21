@@ -19,6 +19,7 @@ define(function (require) {
     require("CodeMirror/mode/javascript/javascript");
 
     mockfs = require("./mockfs");
+    mockfs.examples = require("./examples");
 
     var LOCAL_STORAGE_CODE_KEY = "code";
 

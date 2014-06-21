@@ -1,4 +1,15 @@
-define(function (require, exports) {
+/* global module */
+
+(function (mod) {
+    "use strict";
+    if (typeof exports === "object" && typeof module === "object") { // CommonJS
+        module.exports = mod();
+    } else if (typeof define === "function" && define.amd) { // AMD
+        return define([], mod);
+    } else { // Plain browser env
+        window.mockfs = mod();
+    }
+})(function () {
     "use strict";
 
     var MIN_DELAY = 10,
@@ -124,10 +135,11 @@ define(function (require, exports) {
         };
     };
 
-    exports.join = join;
-    exports.statSync = statSync;
-    exports.listSync = listSync;
-    exports.stat = _makeAsync(statSync);
-    exports.list = _makeAsync(listSync);
-
+    return {
+        join : join,
+        statSync : statSync,
+        listSync : listSync,
+        stat : _makeAsync(statSync),
+        list : _makeAsync(listSync)
+    };
 });
