@@ -31,7 +31,9 @@
     <h2>The Challenge</h2>
     <p>Writing code that uses asynchronous APIs is difficult. Structuring that code well is even more difficult. First, take a look at the <em>synchronous</em> recursive listing example below. That code recursively visits the entire file system and outputs a tree representation of everything in it. Essentially, it implements <code>ls -R</code>.</p>
 
-    <p>Try writing the same recursive code using only the <em>asynchronous</em> API (and <code>join</code>). Your code should be as &quot;parallel&quot; as possible &emdash; you shouldn't wait for one stat call to return before doing the next stat call, for example.</p>
+    <p>Try writing the same recursive code using only the <em>asynchronous</em> API (and <code>join</code>). Your code should be as &quot;parallel&quot; as possible &mdash; you shouldn't wait for one stat call to return before doing the next stat call, for example.</p>
+
+    <p>Note that sometimes an asynchronous call may not ever call its callback (e.g., in the case of a timeout). You should handle this case as well. The &quot;asynchronous stat timeout&quot; should give you the tools necessary to do so.</p>
 
     <p>Your code needn't return everything in the same <em>order</em> as the synchronous code. However, it should return exactly the same data. Every time.</p>
 
@@ -54,7 +56,7 @@
 
     <h4>mockfs.listSync(path)</h4>
     <p>Synchronous list call.</p>
-    <p>On success, returns an array of strings of the names of all objects (files or directories) at the specified path (one level deep). The names are relative (they do not include the full path). <code>..</code> and <code>.</code> are not included. This is the approximate equivalent of <code>ls</code>.</p>
+    <p>On success, returns an array of strings of the names of all objects (files, directories, etc.) at the specified path (one level deep). The names are relative (they do not include the full path). <code>..</code> and <code>.</code> are not included. This is the approximate equivalent of <code>ls</code>.</p>
 
     <h4>mockfs.stat(path, callback)</h4>
     <p>Asynchronous stat call.</p>
