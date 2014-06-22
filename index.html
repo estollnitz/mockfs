@@ -2,48 +2,86 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <title>Mock FS Example</title>
     <link rel="stylesheet" href="bootstrap.min.css">
+    <link rel="stylesheet" href="bootstrap-theme.min.css">
     <link rel="stylesheet" href="codemirror.css">
+    <link rel="stylesheet" href="style.css">
     <script data-main="main" src="main.js"></script>
 </head>
 <body>
-<div>
-<textarea id="text-code" name="text-code">
-/* global mockfs, output */
+<div class="container">
+    <h1>Mock Asynchronous File System Example</h1>
+    <p class="lead">This page contains a mock file system with a very simple synchronous and asynchronous API. It is modeled after <a href="http://nodejs.org/">Node.js</a>'s <a href="http://nodejs.org/api/fs.html">file system API</a>.</p>
 
-var files = {};
+    <h2>The Challenge</h2>
+    <p>Writing code that uses asynchronous APIs is difficult. Structuring that code well is even more difficult. First, take a look at the <em>synchronous</em> recursive listing example below. That code recursively visits the entire file system and outputs a tree representation of everything in it. Essentially, it implements <code>ls -R</code>.</p>
 
-var processDir = function (path, entry) {
-    var files = mockfs.listSync(path);
-    files.forEach(function (f) {
-        try {
-            var childPath = mockfs.join(path, f),
-                stat = mockfs.statSync(childPath);
+    <p>Try writing the same recursive code using only the <em>asynchronous</em> API (and <code>join</code>). Your code should be as &quot;parallel&quot; as possible &emdash; you shouldn't wait for one stat call to return before doing the next stat call, for example.</p>
 
-            if (stat.isDirectory()) {
-                entry[f] = {};
-                processDir(childPath, entry[f]);
-            } else if (stat.isFile()) {
-                entry[f] = "file";
-            } else {
-                entry[f] = "unknown";
-            }
+    <p>Your code needn't return everything in the same <em>order</em> as the synchronous code. However, it should return exactly the same data. Every time.</p>
 
-        } catch (e) {
-            entry[f] = "error: " + e.message;
-        }
-    });
-};
+    <p>A few other examples are provided to help you with JavaScript syntax that may be unfamiliar to you. Those examples should contain all of the low-level knowledge you need to make this happen.</p>
 
-processDir("/", files);
+    <h2>The File System Code</h2>
+    <p>The file system API can be accessed via the <code>mockfs</code> global on this page.</p>
 
-output(files);
-</textarea>
-</div>
-<button id="btn-run">Run</button>
-<h1>Output</h1>
-<div id="div-output">
+    <p>The implementation of <code>mockfs</code> is available <a href="https://github.com/joelrbrandt/mockfs/blob/master/js/mockfs.js">on github</a>. That file works as an AMD module, a CommonJS module, and also as plain JS. So, if you don't like working in this web page, you can download this file and include it with a <code>&lt;script&gt;</code> tag on a simple HTML page. Or, you can just open the development console here.</p>
+
+    <h2>The File System API</h2>
+
+    <h4>mockfs.join(a, b)</h4>
+    <p>Joins two paths, taking care to clean up any extra '/' characters.</p>
+
+    <h4>mockfs.statSync(path)</h4>
+    <p>Synchronous stat call.</p>
+    <p>On success, returns an object with two functions: <code>isFile</code> and <code>isDirectory</code>. These functions evaluate to a boolean indicating whether the stated path is a file or a directory, respectively.</p>
+    <p>On error, throws an <code>Error</code> object with a descriptive message.</p>
+
+    <h4>mockfs.listSync(path)</h4>
+    <p>Synchronous list call.</p>
+    <p>On success, returns an array of strings of the names of all objects (files or directories) at the specified path (one level deep). The names are relative (they do not include the full path). <code>..</code> and <code>.</code> are not included. This is the approximate equivalent of <code>ls</code>.</p>
+
+    <h4>mockfs.stat(path, callback)</h4>
+    <p>Asynchronous stat call.</p>
+    <p>The callback gets two arguments <code>(err, result)</code>. <code>err</code> is null if there is no error, or is a string if there is an error. <code>result</code> is an object as defined in <code>mockfs.statSync</code>.</p>
+
+    <h4>mockfs.list(path, callback)</h4>
+    <p>Asynchronous list call.</p>
+    <p>The callback gets two arguments <code>(err, result)</code>. <code>err</code> is null if there is no error, or is a string if there is an error. <code>result</code> is an array as defined in <code>mockfs.listSync</code>.</p>
+
+    <h4>output(foo)</h4>
+    <p>Logging call.</p>
+    <p>Prints either a JSONified representation of <code>foo</code> (if possible) or the result of <code>String(foo)</code> to the output log on this page. The output log is <em>prepended</em> for each output call (new logs appear at the top).</p>
+    <p><strong>Note:</strong> This function is not included in the mockfs.js file linked above.</p>
+
+    <h2>Your code</h2>
+    <p>Code you enter below will be executed when you click 'Run'.</p>
+    <p>Any globals you define (or modify) are in the page's global space, so you have the possibility of really messing things up. But if you do, just hit reload! Your code is automatically saved (using HTML5 local storage) as you edit it. The next time you visit this page, it'll be there waiting for you. (Of course, you execute some really crazy code, you might break that, too!)</p>
+    <p>Calls to <code>output(foo)</code> write to the log below. See documentation above for more details.</p>
+
+    <div class="panel panel-default">
+    <div class="panel-body">
+    <textarea id="text-code" name="text-code">
+    </textarea>
+    </div>
+    </div>
+    <p><button id="btn-run" class="btn btn-lg btn-primary">Run</button></p>
+
+    <h3>Examples</h3>
+    <p>These examples are intended to demonstrate basing JavaScript syntax and basic usage of the API. That way, you can concentrate on the hard part: figuring out how to do complicated things with an asynchronous API.</p>
+    <p><strong>Important:</strong> Loading these examples will replace (and throw away) any code you may have entered above.</p>
+    <button id="btn-load-sync-recursive" class="btn btn-sm btn-default">Synchronous Recursive Listing</button>
+    <button id="btn-load-list-root" class="btn btn-sm btn-default">Asynchronous List Root</button>
+    <button id="btn-load-stat-root" class="btn btn-sm btn-default">Asynchronous Stat Root</button>
+    <button id="btn-load-stat-timeout" class="btn btn-sm btn-default">Asynchronous Stat Timeout</button>
+    </p>
+
+    <h2>Output</h2>
+    <div id="div-output" class="well well-sm"></div>
 </div>
 </body>
 </html>

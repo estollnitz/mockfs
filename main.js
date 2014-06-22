@@ -2077,6 +2077,152 @@ var requirejs, require, define;
 
 define("requirejs", function(){});
 
+/* global module */
+
+(function (mod) {
+    
+    if (typeof exports === "object" && typeof module === "object") { // CommonJS
+        module.exports = mod();
+    } else if (typeof define === "function" && define.amd) { // AMD
+        return define('mockfs',[], mod);
+    } else { // Plain browser env
+        window.mockfs = mod();
+    }
+})(function () {
+    
+
+    var MIN_DELAY = 10,
+        DELAY_VARIANCE = 100;
+
+    var ERROR_NO_SUCH_ENTRY = "No such entry",
+        ERROR_FS_ERROR = "Filesystem error",
+        ERROR_TIMEOUT = "Filesystem timeout";
+
+    var FILESYSTEM = {
+        a : "file",
+        b : {
+            aa : "file",
+            bb : "error",
+            cc : "file"
+        },
+        c : "file",
+        d : {
+            dd : { }
+        },
+        e : "file",
+        f : {
+            ee : "pipe",
+            ff : "timeout",
+            gg : {
+                hhh : {
+                    iiii : "file"
+                }
+            }
+        },
+        g : "file"
+    };
+
+    var _getEntry = function (path) {
+        var p = path.split("/"),
+            e = FILESYSTEM,
+            i;
+
+        if (p[0] === "") {
+            p.shift();
+        }
+
+        if (p[p.length - 1] === "") {
+            p.pop();
+        }
+
+        for (i = 0; i < p.length; ++i) {
+            if (p[i] === "") {
+                e = null;
+                break;
+            }
+
+            e = e[p[i]];
+            if (!e) {
+                break;
+            }
+        }
+        
+        return e;
+    };
+
+    var join = function (p1, p2) {
+        if (p1 !== "" && p2 !== "") {
+            if (p1[p1.length - 1] !== "/") {
+                p1 = p1 + "/";
+            }
+
+            if (p2[0] === "/") {
+                p2 = p2.substr(1);
+            }
+        }
+        
+        return p1 + p2;
+    };
+
+    var statSync = function (path) {
+        var e = _getEntry(path);
+
+        if (!e) {
+            throw new Error(ERROR_NO_SUCH_ENTRY);
+        } else if (e === "error") {
+            throw new Error(ERROR_FS_ERROR);
+        } else if (e === "timeout") {
+            throw new Error(ERROR_TIMEOUT);
+        } else {
+            return {
+                isFile : function () {
+                    return e === "file";
+                },
+                isDirectory : function () {
+                    return typeof(e) === "object";
+                }
+            };
+        }
+    };
+
+    var listSync = function (path) {
+        var e = _getEntry(path);
+        if (!e || typeof(e) !== "object") {
+            throw new Error(ERROR_FS_ERROR);
+        } else {
+            return Object.keys(e);
+        }
+    };
+
+    var _makeAsync = function (syncFunction) {
+        return function (param, callback) {
+            var delay = Math.floor(Math.random() * DELAY_VARIANCE) + MIN_DELAY,
+                result = null,
+                error = null;
+
+            try {
+                result = syncFunction(param);
+            } catch (e) {
+                error = e.message;
+            }
+
+            if (error !== ERROR_TIMEOUT) {
+                setTimeout(function () {
+                    callback(error, result);
+                }, delay);
+            }
+        };
+    };
+
+    return {
+        join : join,
+        statSync : statSync,
+        listSync : listSync,
+        stat : _makeAsync(statSync),
+        list : _makeAsync(listSync)
+    };
+});
+
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -10550,152 +10696,6 @@ CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript
 
 });
 
-/* global module */
-
-(function (mod) {
-    
-    if (typeof exports === "object" && typeof module === "object") { // CommonJS
-        module.exports = mod();
-    } else if (typeof define === "function" && define.amd) { // AMD
-        return define('mockfs',[], mod);
-    } else { // Plain browser env
-        window.mockfs = mod();
-    }
-})(function () {
-    
-
-    var MIN_DELAY = 10,
-        DELAY_VARIANCE = 100;
-
-    var ERROR_NO_SUCH_ENTRY = "No such entry",
-        ERROR_FS_ERROR = "Filesystem error",
-        ERROR_TIMEOUT = "Filesystem timeout";
-
-    var FILESYSTEM = {
-        a : "file",
-        b : {
-            aa : "file",
-            bb : "error",
-            cc : "file"
-        },
-        c : "file",
-        d : {
-            dd : { }
-        },
-        e : "file",
-        f : {
-            ee : "file",
-            ff : "timeout",
-            gg : {
-                hhh : {
-                    iiii : "file"
-                }
-            }
-        },
-        g : "file"
-    };
-
-    var _getEntry = function (path) {
-        var p = path.split("/"),
-            e = FILESYSTEM,
-            i;
-
-        if (p[0] === "") {
-            p.shift();
-        }
-
-        if (p[p.length - 1] === "") {
-            p.pop();
-        }
-
-        for (i = 0; i < p.length; ++i) {
-            if (p[i] === "") {
-                e = null;
-                break;
-            }
-
-            e = e[p[i]];
-            if (!e) {
-                break;
-            }
-        }
-        
-        return e;
-    };
-
-    var join = function (p1, p2) {
-        if (p1 !== "" && p2 !== "") {
-            if (p1[p1.length - 1] !== "/") {
-                p1 = p1 + "/";
-            }
-
-            if (p2[0] === "/") {
-                p2 = p2.substr(1);
-            }
-        }
-        
-        return p1 + p2;
-    };
-
-    var statSync = function (path) {
-        var e = _getEntry(path);
-
-        if (!e) {
-            throw new Error(ERROR_NO_SUCH_ENTRY);
-        } else if (e === "error") {
-            throw new Error(ERROR_FS_ERROR);
-        } else if (e === "timeout") {
-            throw new Error(ERROR_TIMEOUT);
-        } else {
-            return {
-                isFile : function () {
-                    return e === "file";
-                },
-                isDirectory : function () {
-                    return e !== "file";
-                }
-            };
-        }
-    };
-
-    var listSync = function (path) {
-        var e = _getEntry(path);
-        if (!e || typeof(e) !== "object") {
-            throw new Error(ERROR_FS_ERROR);
-        } else {
-            return Object.keys(e);
-        }
-    };
-
-    var _makeAsync = function (syncFunction) {
-        return function (param, callback) {
-            var delay = Math.floor(Math.random() * DELAY_VARIANCE) + MIN_DELAY,
-                result = null,
-                error = null;
-
-            try {
-                result = syncFunction(param);
-            } catch (e) {
-                error = e.message;
-            }
-
-            if (error !== ERROR_TIMEOUT) {
-                setTimeout(function () {
-                    callback(error, result);
-                }, delay);
-            }
-        };
-    };
-
-    return {
-        join : join,
-        statSync : statSync,
-        listSync : listSync,
-        stat : _makeAsync(statSync),
-        list : _makeAsync(listSync)
-    };
-});
-
 /* global mockfs, output */
 
 define('examples',['require','exports','module'],function (require, exports) {
@@ -10747,7 +10747,26 @@ define('examples',['require','exports','module'],function (require, exports) {
             if (err) {
                 output("error: " + err);
             } else {
-                output("stat of '/': isFile: " + result.isFile() + ", isDirectory: " + result.isDirectory());
+                output("stat result: isFile: " + result.isFile() + ", isDirectory: " + result.isDirectory());
+            }
+        });
+    };
+
+    exports.statTimeout = function () {
+        var TIMEOUT = 500;
+        var timer = setTimeout(function () {
+            timer = null;
+            output("error: timeout");
+        }, TIMEOUT);
+
+        mockfs.stat("/f/ff", function (err, result) {
+            if (timer) {
+                clearTimeout(timer);
+                if (err) {
+                    output("error: " + err);
+                } else {
+                    output("stat result: isFile: " + result.isFile() + ", isDirectory: " + result.isDirectory());
+                }
             }
         });
     };
@@ -10764,37 +10783,70 @@ require.config({
 output = null;
 mockfs = null;
 
-define('main',['require','CodeMirror/lib/codemirror','CodeMirror/addon/edit/matchbrackets','CodeMirror/addon/comment/continuecomment','CodeMirror/mode/javascript/javascript','./mockfs','./examples'],function (require) {
+define('main',['require','./mockfs','CodeMirror/lib/codemirror','CodeMirror/addon/edit/matchbrackets','CodeMirror/addon/comment/continuecomment','CodeMirror/mode/javascript/javascript','./examples'],function (require) {
     
 
-    var CodeMirror = require("CodeMirror/lib/codemirror");
+    // initialize global mockfs object
+    mockfs = require("./mockfs");
 
+    // load CodeMirror and modes
+    var CodeMirror = require("CodeMirror/lib/codemirror");
     require("CodeMirror/addon/edit/matchbrackets");
     require("CodeMirror/addon/comment/continuecomment");
     require("CodeMirror/mode/javascript/javascript");
 
-    mockfs = require("./mockfs");
-    mockfs.examples = require("./examples");
+    var examples = require("./examples");
 
-    var LOCAL_STORAGE_CODE_KEY = "code";
+    var LOCAL_STORAGE_CODE_KEY = "code",
+        CODE_SAVE_TIMEOUT = 500;
 
     var _editor;
 
     var _runHandler = function () {
         var code = _editor.getDoc().getValue();
-        window.localStorage.setItem(LOCAL_STORAGE_CODE_KEY, code);
         /* jshint evil: true */
         eval("(function () {" + code + "}())");
         /* jshint evil: false */
     };
 
-    var _createOutputFunction = function (outputDiv) {
-        var hasOutput = false;
+    var _loadExample = function (exampleFunc) {
+        var lines = exampleFunc.toString().split("\n");
+        
+        // trim off "function () {" and "}""
+        lines.splice(0, 1);
+        lines.splice(lines.length - 1, 1);
 
+        lines = lines.map(function (l) {
+            if (l.indexOf("        ") === 0) {
+                return l.substr(8);
+            } else {
+                return l;
+            }
+        });
+        _editor.getDoc().setValue(lines.join("\n"));
+    };
+
+    var _initAutoSave = function () {
+        var doSave = function () {
+            var code = _editor.getDoc().getValue();
+            window.localStorage.setItem(LOCAL_STORAGE_CODE_KEY, code);
+        };
+
+        var lastSaveTimer = null;
+
+        _editor.on("change", function () {
+            if (lastSaveTimer) {
+                clearTimeout(lastSaveTimer);
+                lastSaveTimer = null;
+            }
+            lastSaveTimer = setTimeout(doSave, CODE_SAVE_TIMEOUT);
+        });
+    };
+
+    var _createOutputFunction = function (outputDiv) {
         return function (toOutput) {
             var s = null,
-                pre = document.createElement("pre"),
-                hr = hasOutput ? document.createElement("hr") : null;
+                pre = document.createElement("pre");
 
             if (typeof(toOutput) === "object") {
                 try {
@@ -10807,22 +10859,23 @@ define('main',['require','CodeMirror/lib/codemirror','CodeMirror/addon/edit/matc
             }
 
             pre.innerText = s;
-            if (hr) {
-                outputDiv.insertBefore(hr, outputDiv.firstElementChild);
-            }
             outputDiv.insertBefore(pre, outputDiv.firstElementChild);
-
-            hasOutput = true;
         };
     };
 
     var _setup = function () {
         var codeTextArea = document.getElementById("text-code"),
             runButton = document.getElementById("btn-run"),
+            loadSyncRecursiveButton = document.getElementById("btn-load-sync-recursive"),
+            loadListRootButton = document.getElementById("btn-load-list-root"),
+            loadStatRootButton = document.getElementById("btn-load-stat-root"),
+            loadStatTimeoutButton = document.getElementById("btn-load-stat-timeout"),
             outputDiv = document.getElementById("div-output"),
             previousCode = window.localStorage.getItem(LOCAL_STORAGE_CODE_KEY);
 
-        if (codeTextArea && runButton && outputDiv) {
+        if (codeTextArea && runButton && loadSyncRecursiveButton &&
+            loadListRootButton && loadStatRootButton &&
+            loadStatTimeoutButton && outputDiv) {
             _editor = CodeMirror.fromTextArea(codeTextArea, {
                 lineNumbers: true,
                 matchBrackets: true,
@@ -10835,11 +10888,29 @@ define('main',['require','CodeMirror/lib/codemirror','CodeMirror/addon/edit/matc
             }
 
             runButton.onclick = _runHandler;
+            loadSyncRecursiveButton.onclick = function () {
+                _loadExample(examples.syncRecursive);
+            };
+            loadListRootButton.onclick = function () {
+                _loadExample(examples.listRoot);
+            };
+            loadStatRootButton.onclick = function () {
+                _loadExample(examples.statRoot);
+            };
+            loadStatTimeoutButton.onclick = function () {
+                _loadExample(examples.statTimeout);
+            };
 
             output = _createOutputFunction(outputDiv);
 
+            _initAutoSave();
+
         } else {
             alert("Unknown initialization error. Things definitely won't work");
+        }
+
+        if (navigator.userAgent.indexOf("Chrome/") < 0) {
+            alert("This web page is only known to work in Chrome.\n\nProceed at your own risk.");
         }
     };
 
