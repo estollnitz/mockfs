@@ -22,7 +22,7 @@
 
     <p>Try writing the same recursive code using only the <em>asynchronous</em> API (and <code>join</code>). Your code should be as &quot;parallel&quot; as possible &mdash; you shouldn't wait for one stat call to return before doing the next stat call, for example.</p>
 
-    <p>Note that sometimes an asynchronous call may not ever call its callback (e.g., in the case of a timeout). You should handle this case as well. The &quot;asynchronous stat timeout&quot; should give you the tools necessary to do so.</p>
+    <p>Note that sometimes an asynchronous call may not ever call its callback (e.g., in the case of an error in the underlying system). You should handle this case as well. The &quot;asynchronous stat timeout&quot; should give you the tools necessary to do so.</p>
 
     <p>Your code needn't return everything in the same <em>order</em> as the synchronous code. However, it should return exactly the same data. Every time.</p>
 
