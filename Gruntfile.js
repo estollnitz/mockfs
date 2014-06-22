@@ -86,9 +86,18 @@ module.exports = function (grunt) {
                         dest: "build/bootstrap.min.css"
                     },
                     {
+                        src: "bower_components/bootstrap/dist/css/bootstrap-theme.min.css",
+                        dest: "build/bootstrap-theme.min.css"
+                    },
+                    {
                         src: "bower_components/codemirror/lib/codemirror.css",
                         dest: "build/codemirror.css"
+                    },
+                    {
+                        src: "html/style.css",
+                        dest: "build/style.css"
                     }
+
                 ]
             },
             html : {

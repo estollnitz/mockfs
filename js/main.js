@@ -12,34 +12,67 @@ mockfs = null;
 define(function (require) {
     "use strict";
 
-    var CodeMirror = require("CodeMirror/lib/codemirror");
+    // initialize global mockfs object
+    mockfs = require("./mockfs");
 
+    // load CodeMirror and modes
+    var CodeMirror = require("CodeMirror/lib/codemirror");
     require("CodeMirror/addon/edit/matchbrackets");
     require("CodeMirror/addon/comment/continuecomment");
     require("CodeMirror/mode/javascript/javascript");
 
-    mockfs = require("./mockfs");
-    mockfs.examples = require("./examples");
+    var examples = require("./examples");
 
-    var LOCAL_STORAGE_CODE_KEY = "code";
+    var LOCAL_STORAGE_CODE_KEY = "code",
+        CODE_SAVE_TIMEOUT = 500;
 
     var _editor;
 
     var _runHandler = function () {
         var code = _editor.getDoc().getValue();
-        window.localStorage.setItem(LOCAL_STORAGE_CODE_KEY, code);
         /* jshint evil: true */
         eval("(function () {" + code + "}())");
         /* jshint evil: false */
     };
 
-    var _createOutputFunction = function (outputDiv) {
-        var hasOutput = false;
+    var _loadExample = function (exampleFunc) {
+        var lines = exampleFunc.toString().split("\n");
+        
+        // trim off "function () {" and "}""
+        lines.splice(0, 1);
+        lines.splice(lines.length - 1, 1);
 
+        lines = lines.map(function (l) {
+            if (l.indexOf("        ") === 0) {
+                return l.substr(8);
+            } else {
+                return l;
+            }
+        });
+        _editor.getDoc().setValue(lines.join("\n"));
+    };
+
+    var _initAutoSave = function () {
+        var doSave = function () {
+            var code = _editor.getDoc().getValue();
+            window.localStorage.setItem(LOCAL_STORAGE_CODE_KEY, code);
+        };
+
+        var lastSaveTimer = null;
+
+        _editor.on("change", function () {
+            if (lastSaveTimer) {
+                clearTimeout(lastSaveTimer);
+                lastSaveTimer = null;
+            }
+            lastSaveTimer = setTimeout(doSave, CODE_SAVE_TIMEOUT);
+        });
+    };
+
+    var _createOutputFunction = function (outputDiv) {
         return function (toOutput) {
             var s = null,
-                pre = document.createElement("pre"),
-                hr = hasOutput ? document.createElement("hr") : null;
+                pre = document.createElement("pre");
 
             if (typeof(toOutput) === "object") {
                 try {
@@ -52,22 +85,23 @@ define(function (require) {
             }
 
             pre.innerText = s;
-            if (hr) {
-                outputDiv.insertBefore(hr, outputDiv.firstElementChild);
-            }
             outputDiv.insertBefore(pre, outputDiv.firstElementChild);
-
-            hasOutput = true;
         };
     };
 
     var _setup = function () {
         var codeTextArea = document.getElementById("text-code"),
             runButton = document.getElementById("btn-run"),
+            loadSyncRecursiveButton = document.getElementById("btn-load-sync-recursive"),
+            loadListRootButton = document.getElementById("btn-load-list-root"),
+            loadStatRootButton = document.getElementById("btn-load-stat-root"),
+            loadStatTimeoutButton = document.getElementById("btn-load-stat-timeout"),
             outputDiv = document.getElementById("div-output"),
             previousCode = window.localStorage.getItem(LOCAL_STORAGE_CODE_KEY);
 
-        if (codeTextArea && runButton && outputDiv) {
+        if (codeTextArea && runButton && loadSyncRecursiveButton &&
+            loadListRootButton && loadStatRootButton &&
+            loadStatTimeoutButton && outputDiv) {
             _editor = CodeMirror.fromTextArea(codeTextArea, {
                 lineNumbers: true,
                 matchBrackets: true,
@@ -80,11 +114,29 @@ define(function (require) {
             }
 
             runButton.onclick = _runHandler;
+            loadSyncRecursiveButton.onclick = function () {
+                _loadExample(examples.syncRecursive);
+            };
+            loadListRootButton.onclick = function () {
+                _loadExample(examples.listRoot);
+            };
+            loadStatRootButton.onclick = function () {
+                _loadExample(examples.statRoot);
+            };
+            loadStatTimeoutButton.onclick = function () {
+                _loadExample(examples.statTimeout);
+            };
 
             output = _createOutputFunction(outputDiv);
 
+            _initAutoSave();
+
         } else {
             alert("Unknown initialization error. Things definitely won't work");
+        }
+
+        if (navigator.userAgent.indexOf("Chrome/") < 0) {
+            alert("This web page is only known to work in Chrome.\n\nProceed at your own risk.");
         }
     };
 

@@ -1,0 +1,36 @@
+/* CodeMirror Styling */
+
+.CodeMirror {
+  font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+  font-size: 13px;
+  height: 400px;
+  background-color: transparent;
+  color:#2e383c;
+  line-height:1.4375;
+}
+
+.CodeMirror-gutters {
+  border-right: 1px solid #ddd;
+  background-color: transparent;
+}
+
+.CodeMirror-linenumber {
+  color: #ccc;
+}
+
+.cm-comment {color:#75787b}
+.cm-keyword, .cm-s-neo .cm-property {color:#1d75b3}
+.cm-atom,.cm-s-neo .cm-number {color:#75438a}
+.cm-node,.cm-s-neo .cm-tag {color:#9c3328}
+.cm-string {color:#b35e14}
+.cm-variable,.cm-s-neo .cm-qualifier {color:#047d65}
+
+/* General Page Styling */
+
+h4 {
+  margin-top: 20px;
+}
+
+h1, h2, h3 {
+  color: #428bca;
+}

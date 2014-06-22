@@ -32,7 +32,7 @@
         },
         e : "file",
         f : {
-            ee : "file",
+            ee : "pipe",
             ff : "timeout",
             gg : {
                 hhh : {
@@ -100,7 +100,7 @@
                     return e === "file";
                 },
                 isDirectory : function () {
-                    return e !== "file";
+                    return typeof(e) === "object";
                 }
             };
         }

@@ -49,7 +49,26 @@ define(function (require, exports) {
             if (err) {
                 output("error: " + err);
             } else {
-                output("stat of '/': isFile: " + result.isFile() + ", isDirectory: " + result.isDirectory());
+                output("stat result: isFile: " + result.isFile() + ", isDirectory: " + result.isDirectory());
+            }
+        });
+    };
+
+    exports.statTimeout = function () {
+        var TIMEOUT = 500;
+        var timer = setTimeout(function () {
+            timer = null;
+            output("error: timeout");
+        }, TIMEOUT);
+
+        mockfs.stat("/f/ff", function (err, result) {
+            if (timer) {
+                clearTimeout(timer);
+                if (err) {
+                    output("error: " + err);
+                } else {
+                    output("stat result: isFile: " + result.isFile() + ", isDirectory: " + result.isDirectory());
+                }
             }
         });
     };
