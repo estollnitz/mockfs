@@ -10772,7 +10772,7 @@ define('examples',['require','exports','module'],function (require, exports) {
     };
 });
 
-/* global require, alert, output: true, mockfs: true */
+/* global require, $, alert, output: true, mockfs: true */
 
 require.config({
     paths: {
@@ -10807,6 +10807,13 @@ define('main',['require','./mockfs','CodeMirror/lib/codemirror','CodeMirror/addo
         /* jshint evil: true */
         eval("(function () {" + code + "}())");
         /* jshint evil: false */
+    };
+
+    var _changeEditorSize = function (delta) {
+        var $cm = $(".CodeMirror"),
+            newHeight = Math.max($cm.height() + delta, 100);
+
+        $cm.height(newHeight);
     };
 
     var _loadExample = function (exampleFunc) {
@@ -10866,6 +10873,8 @@ define('main',['require','./mockfs','CodeMirror/lib/codemirror','CodeMirror/addo
     var _setup = function () {
         var codeTextArea = document.getElementById("text-code"),
             runButton = document.getElementById("btn-run"),
+            increaseButton = document.getElementById("btn-increase"),
+            decreaseButton = document.getElementById("btn-decrease"),
             loadSyncRecursiveButton = document.getElementById("btn-load-sync-recursive"),
             loadListRootButton = document.getElementById("btn-load-list-root"),
             loadStatRootButton = document.getElementById("btn-load-stat-root"),
@@ -10873,8 +10882,8 @@ define('main',['require','./mockfs','CodeMirror/lib/codemirror','CodeMirror/addo
             outputDiv = document.getElementById("div-output"),
             previousCode = window.localStorage.getItem(LOCAL_STORAGE_CODE_KEY);
 
-        if (codeTextArea && runButton && loadSyncRecursiveButton &&
-            loadListRootButton && loadStatRootButton &&
+        if (codeTextArea && runButton && increaseButton && decreaseButton &&
+            loadSyncRecursiveButton && loadListRootButton && loadStatRootButton &&
             loadStatTimeoutButton && outputDiv) {
             _editor = CodeMirror.fromTextArea(codeTextArea, {
                 lineNumbers: true,
@@ -10888,6 +10897,14 @@ define('main',['require','./mockfs','CodeMirror/lib/codemirror','CodeMirror/addo
             }
 
             runButton.onclick = _runHandler;
+
+            increaseButton.onclick = function () {
+                _changeEditorSize(100);
+            };
+            decreaseButton.onclick = function () {
+                _changeEditorSize(-100);
+            };
+
             loadSyncRecursiveButton.onclick = function () {
                 _loadExample(examples.syncRecursive);
             };
