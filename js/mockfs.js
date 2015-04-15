@@ -24,7 +24,8 @@
         b : {
             aa : "file",
             bb : "error",
-            cc : "file"
+            cc : "file",
+            dd : "timeout"
         },
         c : "file",
         d : {
